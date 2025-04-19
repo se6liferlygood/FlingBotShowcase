@@ -1,6 +1,6 @@
 const canvas = document.getElementById("canvas1");
 const ctx = canvas.getContext('2d');
-canvas.height = 200;
+canvas.height = 300;
 canvas.width = Math.round(canvas.height * (window.innerWidth / window.innerHeight));
 
 alert("Fling bot showcase!\n\nWorks that the bot predicts the future from only 2 sources of information, time and distance.\n\nRed path shows the path the bot predicts you will go.");
@@ -25,7 +25,7 @@ addEventListener("mousemove", (e) => {
     mouse.x = (e.x / window.innerWidth) * canvas.width;
 })
 
-var forceMultiplier = 100; //N
+var forceMultiplier = 1000; //N
 
 addEventListener("click", (e) => {
     d = distance(mouse.x,mouse.y,canvas.width/2,canvas.height/2);
@@ -61,7 +61,6 @@ class player {
         if(distance(this.pos[0],this.pos[1],0,0) > 100000) {
             this.pos = [0,0];
             this.v = [0,0];
-            bot.predict();
             console.log("RESET TO ORIGIN");
         }
 	}
@@ -81,7 +80,7 @@ RelativeDraw = (x,y,size) => {
 DrawMap = () => {
     for(let i = 0; i < canvas.width; i++) {
         for(let j = 0; j < canvas.height; j++) {
-            if(Math.round(Math.abs(player1.pos[0] + i)) % 100 == 0 || Math.round(Math.abs(player1.pos[1] + j)) % 100 == 0) {
+            if(Math.round(Math.abs(player1.pos[0] + i)) % 150 == 0 || Math.round(Math.abs(player1.pos[1] + j)) % 150 == 0) {
                 ctx.fillRect(i,j,1,1);
             }
         }
@@ -106,9 +105,8 @@ colision = (time,flingforce) => {
         console.log("COLISION FORCE",player1.f,"PLAYER COORDINATE",player1.pos);
         setTimeout(() => {
             player1.f = [0,0];
-            bot.predict();
             applyforce = true;
-        },time);
+        },time)
     }
 }
 
@@ -116,13 +114,12 @@ class flingbot {
     constructor(pos) {
         this.list = [[],[]]; //x, y
         this.rpos = [0,0];
-        this.gpos = [0,0];
         this.pos = pos;
         this.size = -1;
-        this.change = 3000;
+        this.change = 1000;
         this.elapsed = 0;
-        this.finaldelta = 0;
         this.radius = 15;
+        this.force = 10000;
         this.color = false;
         this.fx = { //max second grade polynomial approximation function
             xsm: 0, //x squared multiplier
@@ -177,12 +174,9 @@ class flingbot {
             this.fy.m = this.list[1][0][1]-this.fy.ysm*this.list[1][0][0]**2-this.fy.ym*this.list[1][0][0];
 
             //reset the list and set that math function is defined
-            this.finaldelta = this.list[0][2][0];
+            this.elapsed += this.list[0][2][0];
             this.list = [[],[]];
             this.fset = true;
-            this.gpos[0] = this.rpos[0] + this.fx.xsm * this.change**2 + this.fx.xm * this.change + this.fx.m;
-            this.gpos[1] = this.rpos[1] + this.fy.ysm * this.change**2 + this.fy.ym * this.change + this.fy.m;
-            this.v = [(this.gpos[0]-this.pos[0])/this.tgoal,(this.gpos[1]-this.pos[1])/this.tgoal];
         }
         }
 
@@ -196,12 +190,16 @@ class flingbot {
         RelativeDraw(this.pos[0],this.pos[1],10,10);
 
         if(this.fset == true) {
+            if(distance(pos[0],pos[1],this.xprediction(this.elapsed),this.yprediction(this.elapsed)) > 5) {
+                this.fset = false;
+                this.elapsed = 0;
+            }
             this.elapsed += delta
-            if(this.elapsed >= this.change + this.finaldelta || distance(this.pos[0],this.pos[1],pos[0],pos[1]) <= this.radius) {
+            if(this.elapsed >= this.change || distance(this.pos[0],this.pos[1],pos[0],pos[1]) <= this.radius) {
                 this.elapsed = 0;
                 this.fset = false;
                 if(distance(this.pos[0],this.pos[1],pos[0],pos[1]) <= this.radius) {
-                    colision(500,10000);
+                    colision(500,this.force);
                 }
             }
             let factor = this.change-this.elapsed
@@ -218,9 +216,6 @@ class flingbot {
                 oy = y;
             }
         }
-    }
-    predict() {
-        this.fset = false;
     }
     xprediction(x) {
         return this.rpos[0] + this.fx.xsm * x**2 + this.fx.xm * x + this.fx.m;
@@ -245,6 +240,9 @@ var game = () => {
 		game();
 	},1000/30);
 }
-alert("CLICK TO ADD FORCE VECTOR! (100 Newton)\n\nRIGHT CLICK TO SET FORCE VECTOR TO 0");
+bot.force = prompt("MAX BOT FLING FORCE (Newton)");
+bot.change = prompt("HOW MANY MILISECONDS WILL THE BOT PREDICT INTO THE FUTURE?");
+
+alert("CLICK TO ADD FORCE VECTOR! (1000 Newton)\n\nRIGHT CLICK TO SET FORCE VECTOR TO 0");
 colision(1000,RB(-5000,5000));
 game();
