@@ -94,7 +94,6 @@ DrawMap = () => {
     for(let i = starti; i < canvas.width; i += ii) {
         if(Math.round(Math.abs(player1.pos[0] + i)) % space == 0 || ii == space) {
             ctx.fillRect(i,1,1,canvas.height);
-            console.log(i);
             if(ii == 1) { 
                 starti = i;
                 ii = space;
@@ -103,7 +102,6 @@ DrawMap = () => {
         for(let j = startj; j < canvas.height; j += ij) {
             if(Math.round(Math.abs(player1.pos[1] + j)) % space == 0 || ij == space) {
                 ctx.fillRect(1,j,canvas.width,1);
-                console.log(j);
                 if(ij == 1) {
                     startj = j;
                     ij = space;
@@ -169,7 +167,7 @@ var predict = (pos,dtime) => {
             oy = y;
         }
     }
-    if(ddtime >= 1000) {
+    if(ddtime >= 10000) {
         for(let i = 0; i <= 2; i++) {
             places[0][0][i] = places[0][0][i] - ddtime;
             places[1][0][i] = places[1][0][i] - ddtime;
