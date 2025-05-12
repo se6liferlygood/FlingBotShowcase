@@ -1,6 +1,6 @@
 const canvas = document.getElementById("canvas1");
 const ctx = canvas.getContext('2d');
-canvas.height = 300;
+canvas.height = 400;
 canvas.width = Math.round(canvas.height * (window.innerWidth / window.innerHeight));
 
 var distance = (x0,y0,x2,y2) => {
@@ -86,10 +86,28 @@ RelativeDraw = (x,y,size) => {
 }
 
 DrawMap = () => {
-    for(let i = 0; i < canvas.width; i++) {
-        for(let j = 0; j < canvas.height; j++) {
-            if(Math.round(Math.abs(player1.pos[0] + i)) % 150 == 0 || Math.round(Math.abs(player1.pos[1] + j)) % 150 == 0) {
-                ctx.fillRect(i,j,1,1);
+    let startj = 0;
+    let starti = 0;
+    let space = 150;
+    let ij = 1;
+    let ii = 1;
+    for(let i = starti; i < canvas.width; i += ii) {
+        if(Math.round(Math.abs(player1.pos[0] + i)) % space == 0 || ii == space) {
+            ctx.fillRect(i,1,1,canvas.height);
+            console.log(i);
+            if(ii == 1) { 
+                starti = i;
+                ii = space;
+            }
+        }
+        for(let j = startj; j < canvas.height; j += ij) {
+            if(Math.round(Math.abs(player1.pos[1] + j)) % space == 0 || ij == space) {
+                ctx.fillRect(1,j,canvas.width,1);
+                console.log(j);
+                if(ij == 1) {
+                    startj = j;
+                    ij = space;
+                }
             }
         }
     }
