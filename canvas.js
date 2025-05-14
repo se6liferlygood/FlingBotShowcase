@@ -81,11 +81,11 @@ class player {
 }
 
 var player1 = new player();
-RelativeDraw = (x,y,size) => {
+var RelativeDraw = (x,y,size) => {
     ctx.fillRect(Math.round(canvas.width/2 + (x - player1.pos[0]) - size/2),Math.round(canvas.height/2 + (y - player1.pos[1]) - size/2),size,size);
 }
 
-DrawMap = () => {
+var DrawMap = () => {
     let startj = 0;
     let starti = 0;
     let space = 150;
@@ -130,12 +130,15 @@ var k = [[0,0],
          [0,0]];
 
 
+var predictm = 5000;
+var predictc = predictm;
+
 var fpredict = (time,axis) => { //axis: 0 = x, 1 = y
     return k[0][axis] + k[1][axis]*time + k[2][axis]*time**2
 }
 var predict = (pos,dtime) => {
     ddtime += dtime
-    if(places.size < 3) {
+    if(size < 3) {
         size++;
         places[0][1].push(pos[0]);
         places[1][1].push(pos[1]);
@@ -159,7 +162,7 @@ var predict = (pos,dtime) => {
         }
         let ox = fpredict(ddtime,0);
         let oy = fpredict(ddtime,1);
-        for(let i = 0; i < 10000; i += 10) {
+        for(let i = 0; i < predictm; i += 10) {
             let x = fpredict(ddtime+i,0);
             let y = fpredict(ddtime+i,1)
             drawline(ox,oy,x,y,"Red");
@@ -176,6 +179,8 @@ var predict = (pos,dtime) => {
     }
 }
 
+var CPS = 1000/1 //colision per second
+
 var start = Date.now();
 var gfps = 1000/60;
 var fps = gfps;
@@ -187,6 +192,15 @@ var game = () => {
     }
     player1.update((1000/fps)*tfactor)
     predict(player1.pos,(1000/fps)*tfactor);
+    let x = fpredict(ddtime+predictc,0);
+    let y = fpredict(ddtime+predictc,1);
+    ctx.fillStyle = "blue";
+    RelativeDraw(x,y,10);
+    drawline(x,y,player1.pos[0],player1.pos[1],"blue");
+    if(predictc >= 0) predictc -= (1000/fps)*(predictm/CPS)*tfactor;
+    if(predictc <= 0) {
+        predictc = predictm;
+    }
     player1.draw()
     if(down == true) {
         point[0] = player1.pos[0] + mouse.x - canvas.width / 2;
@@ -202,6 +216,6 @@ var game = () => {
 	},gfps);
 }
 
-alert("HOLD LEFT MOUSE BUTTON FOR FORCE VECTOR!\n\nRED PATH SHOWS 10 SECOND PREDICTION IF EVERYTHING STAYS THE SAME!");
+alert("HOLD LEFT MOUSE BUTTON FOR FORCE VECTOR!\n\nRED PATH SHOWS THE BOTS PREDICTION OF WHERE YOU WILL BE IN THE FUTURE!\n\nBLUE PATH SHOWS DISTANCE BETWEEN YOU AND THE BOT!\n\nTHE BOT ONLY KNOWS TIME AND COORDINATES!\n\nAN ALGORITHM FOR PREDICTING THE FUTURE IS GOOD IN FLING EXPLOITS FOR EXAMPLE WHERE PING IS A PROBLEM!\n\nTHIS IS ONLY A SHOWCASE SO THE BOT WONT FLING YOU!");
 
 game();
