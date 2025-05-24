@@ -136,14 +136,8 @@ var drawline = (x,y,x2,y2,color) => {
 var places = [[[],[]],[[],[]]] //X: (time, pos), Y: (time, pos)
 var size = 0
 var ddtime = 0;
-var cycle = 0;
-var k = [[0,0],
-         [0,0],
-         [0,0]];
-
 
 var predictm = 5000;
-var predictc = predictm;
 
 var lagrange = (points,x) => { //lagrange interpolation
     let y = 0;
@@ -159,10 +153,6 @@ var lagrange = (points,x) => { //lagrange interpolation
     return y;
 }
 
-var fpredict = (time,axis) => { //axis: 0 = x, 1 = y
-    time += ddtime
-    return k[0][axis] + k[1][axis]*time + k[2][axis]*time**2
-}
 var pgrade = 3;
 var pps = 30 //prediction per second for stability and performance
 var dpt = 0;
